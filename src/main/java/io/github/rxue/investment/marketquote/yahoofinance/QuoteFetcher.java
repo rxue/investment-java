@@ -16,6 +16,8 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
 
+import io.github.rxue.investment.vo.Number;
+
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
@@ -43,7 +45,7 @@ class QuoteFetcher {
     /**
      * @return an instance of the type class of the given metric
      */
-    Map<YahooMetric,Comparable<?>> fetch(String securityId, Set<YahooMetric> metrics) {
+    Map<YahooMetric,Object> fetch(String securityId, Set<YahooMetric> metrics) {
         final URI uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId);
         HttpResponse<String> response = sendRequest(uri);
         if (response.statusCode() == 401) {
@@ -59,11 +61,15 @@ class QuoteFetcher {
         }
         return getValues(quoteSummary, metrics);
     }
-    private Comparable<?> getValue(JsonNode quoteSummary, YahooMetric metric) {
+    private Object getValue(JsonNode quoteSummary, YahooMetric metric) {
         JsonNode value = quoteSummary.path("result").path(0).path(metric.v10Module()).path(metric.metricName());
+        if (metric.typeClass() == Number.class) {
+            return new Number(value.path("raw").decimalValue(),
+                    value.path("fmt").asString());
+        }
         return objectMapper.treeToValue(value, metric.typeClass());
     }
-    Map<YahooMetric,Comparable<?>> getValues(JsonNode quoteSummary, Set<YahooMetric> yahooMetrics) {
+    Map<YahooMetric,Object> getValues(JsonNode quoteSummary, Set<YahooMetric> yahooMetrics) {
         return yahooMetrics.stream()
                 .map(yahooMetric -> new AbstractMap.SimpleImmutableEntry<>(yahooMetric, getValue(quoteSummary, yahooMetric)))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
