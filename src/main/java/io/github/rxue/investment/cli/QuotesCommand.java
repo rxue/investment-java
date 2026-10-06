@@ -56,7 +56,7 @@ public class QuotesCommand implements Callable<Integer> {
         List<MetricValues> sortedValuesList = sortBy == null ? valuesList.valuesList() : valuesList.sortedBy(sortBy);
         List<String> labels = metrics.stream().map(QuoteMetric::label).toList();
         List<List<String>> rows = sortedValuesList.stream()
-                .map(metricValues -> metrics.stream().map(metric -> format(metricValues.get(metric))).toList())
+                .map(metricValues -> metrics.stream().map(metric -> "" + metricValues.get(metric)).toList())
                 .toList();
         String rowFormat = IntStream.range(0, labels.size())
                 .mapToObj(i -> "%-" + Math.max(labels.get(i).length(),
@@ -66,12 +66,5 @@ public class QuotesCommand implements Callable<Integer> {
         out.printf(rowFormat, labels.toArray());
         rows.forEach(row -> out.printf(rowFormat, row.toArray()));
         return 0;
-    }
-
-    private static String format(Comparable<?> value) {
-        if (value instanceof QuotePrice price) {
-            return price.value() + " " + price.currency();
-        }
-        return String.valueOf(value);
     }
 }
