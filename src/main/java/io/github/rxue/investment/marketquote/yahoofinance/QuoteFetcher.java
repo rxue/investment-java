@@ -12,11 +12,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import io.github.rxue.investment.vo.Number;
+import tools.jackson.databind.node.MissingNode;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -61,8 +60,10 @@ class QuoteFetcher {
         }
         return getValues(quoteSummary, metrics);
     }
-    private Object getValue(JsonNode quoteSummary, YahooMetric metric) {
-        JsonNode value = quoteSummary.path("result").path(0).path(metric.v10Module()).path(metric.metricName());
+    Object getValue(JsonNode quoteSummary, YahooMetric metric) {
+        JsonNode value = quoteSummary.path("result").path(0).path(metric.v10Module())
+                .path(metric.metricName());
+        if (value instanceof MissingNode) return null;
         if (metric.typeClass() == Number.class) {
             return new Number(value.path("raw").decimalValue(),
                     value.path("fmt").asString());
@@ -70,9 +71,11 @@ class QuoteFetcher {
         return objectMapper.treeToValue(value, metric.typeClass());
     }
     Map<YahooMetric,Object> getValues(JsonNode quoteSummary, Set<YahooMetric> yahooMetrics) {
-        return yahooMetrics.stream()
-                .map(yahooMetric -> new AbstractMap.SimpleImmutableEntry<>(yahooMetric, getValue(quoteSummary, yahooMetric)))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<YahooMetric,Object> values = new HashMap<>();
+        for (YahooMetric yahooMetric : yahooMetrics) {
+            values.put(yahooMetric, getValue(quoteSummary, yahooMetric));
+        }
+        return Collections.unmodifiableMap(values);
     }
 
 

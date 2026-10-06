@@ -31,9 +31,11 @@ public class YahooFinanceRepository implements Repository {
     @Override
     public Map<QuoteMetric,Comparable<?>> findMetricValues(String securityId, Set<QuoteMetric> quoteMetrics) {
         Map<YahooMetric,Object> yahooMetricValues = quoteFetcher.fetch(securityId, allNeededYahooMetrics(quoteMetrics));
-        return quoteMetrics.stream()
-                .map(quoteMetric -> Map.entry(quoteMetric, getQuoteMetricValue(quoteMetric, yahooMetricValues)))
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<QuoteMetric,Comparable<?>> resultValues = new HashMap<>();
+        for (QuoteMetric quoteMetric : quoteMetrics) {
+            resultValues.put(quoteMetric, getQuoteMetricValue(quoteMetric, yahooMetricValues));
+        }
+        return Collections.unmodifiableMap(resultValues);
     }
 
     private static Comparable<?> getQuoteMetricValue(QuoteMetric quoteMetric, Map<YahooMetric,Object> yahooMetricValues) {

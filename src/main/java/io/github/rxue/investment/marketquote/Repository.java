@@ -5,4 +5,5 @@ import java.util.Set;
 
 public interface Repository {
     Map<QuoteMetric,Comparable<?>> findMetricValues(String securityId, Set<QuoteMetric> quoteMetrics);
+
 }
