@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 
-import io.github.rxue.investment.vo.Number;
+import io.github.rxue.investment.vo.NumberWithFormat;
 import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.CURRENCY;
 import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.REGULAR_MARKET_PRICE;
 import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.TRAILING_PE;
@@ -31,10 +31,10 @@ class QuoteFetcherIT {
         Map<YahooMetric,Object> values = quoteFetcher.fetch("AAPL", metrics);
 
         assertEquals(metrics, values.keySet());
-        Number regularMarketPrice = (Number) values.get(REGULAR_MARKET_PRICE);
+        NumberWithFormat regularMarketPrice = (NumberWithFormat) values.get(REGULAR_MARKET_PRICE);
         assertTrue(regularMarketPrice.value().signum() > 0, "regular market price should be positive but was " + regularMarketPrice.value());
         assertEquals("USD", values.get(CURRENCY));
-        Number trailingPE = (Number) values.get(TRAILING_PE);
+        NumberWithFormat trailingPE = (NumberWithFormat) values.get(TRAILING_PE);
         assertTrue(trailingPE.value().signum() > 0, "trailing P/E should be positive but was " + trailingPE.value());
     }
 }

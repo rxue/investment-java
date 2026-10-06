@@ -3,7 +3,7 @@ package io.github.rxue.investment.marketquote.yahoofinance;
 import io.github.rxue.investment.marketquote.QuoteMetric;
 import io.github.rxue.investment.marketquote.Repository;
 import io.github.rxue.investment.vo.QuotePrice;
-import io.github.rxue.investment.vo.Number;
+import io.github.rxue.investment.vo.NumberWithFormat;
 
 import java.math.BigDecimal;
 import java.net.http.HttpClient;
@@ -40,12 +40,14 @@ public class YahooFinanceRepository implements Repository {
 
     private static Comparable<?> getQuoteMetricValue(QuoteMetric quoteMetric, Map<YahooMetric,Object> yahooMetricValues) {
         return switch(quoteMetric) {
+            case COMPANY_NAME -> (String) yahooMetricValues.get(YahooMetric.LONG_NAME);
             case LATEST_MARKET_PRICE -> {
-                BigDecimal priceValue = ((Number) yahooMetricValues.get(YahooMetric.REGULAR_MARKET_PRICE)).value();
+                BigDecimal priceValue = ((NumberWithFormat) yahooMetricValues.get(YahooMetric.REGULAR_MARKET_PRICE)).value();
                 yield new QuotePrice(priceValue, (String) yahooMetricValues.get(CURRENCY));
             }
-            case TRAILING_PE -> (Number) yahooMetricValues.get(YahooMetric.TRAILING_PE);
-            case DIVIDEND_YIELD -> (Number) yahooMetricValues.get(YahooMetric.DIVIDEND_YIELD);
+            case REGULAR_MARKET_CHANGE_PERCENT -> (NumberWithFormat) yahooMetricValues.get(YahooMetric.REGULAR_MARKET_CHANGE_PERCENT);
+            case TRAILING_PE -> (NumberWithFormat) yahooMetricValues.get(YahooMetric.TRAILING_PE);
+            case DIVIDEND_YIELD -> (NumberWithFormat) yahooMetricValues.get(YahooMetric.DIVIDEND_YIELD);
         };
     }
 
@@ -53,10 +55,12 @@ public class YahooFinanceRepository implements Repository {
         Set<YahooMetric> result = new HashSet<>();
         for (QuoteMetric quoteMetric : quoteMetrics) {
             switch(quoteMetric) {
+                case COMPANY_NAME -> result.add(LONG_NAME);
                 case LATEST_MARKET_PRICE -> {
                     result.add(REGULAR_MARKET_PRICE);
                     result.add(CURRENCY);
                 }
+                case REGULAR_MARKET_CHANGE_PERCENT -> result.add(REGULAR_MARKET_CHANGE_PERCENT);
                 case TRAILING_PE -> result.add(TRAILING_PE);
                 case DIVIDEND_YIELD -> result.add(DIVIDEND_YIELD);
             }

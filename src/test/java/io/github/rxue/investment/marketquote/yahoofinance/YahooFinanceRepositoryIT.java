@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 
-import io.github.rxue.investment.vo.Number;
+import io.github.rxue.investment.vo.NumberWithFormat;
 
 import static io.github.rxue.investment.marketquote.QuoteMetric.DIVIDEND_YIELD;
 import static io.github.rxue.investment.marketquote.QuoteMetric.LATEST_MARKET_PRICE;
@@ -37,7 +37,7 @@ public class YahooFinanceRepositoryIT {
         assertTrue(latestMarketPrice.value().signum() > 0, "latest market price should be positive but was " + latestMarketPrice.value());
         assertEquals("USD", latestMarketPrice.currency());
         // the dividend yield is a fraction, e.g. 0.004 for 0.4%
-        BigDecimal dividendYield = ((Number) values.get(DIVIDEND_YIELD)).value();
+        BigDecimal dividendYield = ((NumberWithFormat) values.get(DIVIDEND_YIELD)).value();
         assertTrue(dividendYield.signum() > 0 && dividendYield.compareTo(BigDecimal.ONE) < 0, "dividend yield should be between 0 and 1 but was " + dividendYield);
     }
 }

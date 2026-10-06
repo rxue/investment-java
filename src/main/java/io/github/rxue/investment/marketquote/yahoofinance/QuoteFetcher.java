@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 
-import io.github.rxue.investment.vo.Number;
+import io.github.rxue.investment.vo.NumberWithFormat;
 import tools.jackson.databind.node.MissingNode;
 
 import static java.util.stream.Collectors.joining;
@@ -64,8 +64,8 @@ class QuoteFetcher {
         JsonNode value = quoteSummary.path("result").path(0).path(metric.v10Module())
                 .path(metric.metricName());
         if (value instanceof MissingNode) return null;
-        if (metric.typeClass() == Number.class) {
-            return new Number(value.path("raw").decimalValue(),
+        if (metric.typeClass() == NumberWithFormat.class) {
+            return new NumberWithFormat(value.path("raw").decimalValue(),
                     value.path("fmt").asString());
         }
         return objectMapper.treeToValue(value, metric.typeClass());

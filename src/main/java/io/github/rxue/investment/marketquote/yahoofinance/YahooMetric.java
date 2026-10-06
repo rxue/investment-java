@@ -1,12 +1,14 @@
 package io.github.rxue.investment.marketquote.yahoofinance;
 
-import io.github.rxue.investment.vo.Number;
+import io.github.rxue.investment.vo.NumberWithFormat;
 
 enum YahooMetric {
-    REGULAR_MARKET_PRICE("price", "regularMarketPrice", Number.class),
+    LONG_NAME("price", "longName", String.class),
+    REGULAR_MARKET_PRICE("price", "regularMarketPrice", NumberWithFormat.class),
+    REGULAR_MARKET_CHANGE_PERCENT("price", "regularMarketChangePercent", NumberWithFormat.class),
     CURRENCY("price", "currency", String.class),
-    TRAILING_PE("summaryDetail", "trailingPE", Number.class),
-    DIVIDEND_YIELD("summaryDetail", "dividendYield", Number.class);
+    TRAILING_PE("summaryDetail", "trailingPE", NumberWithFormat.class),
+    DIVIDEND_YIELD("summaryDetail", "dividendYield", NumberWithFormat.class);
 
     private final String v10Module;
     private final String name;
