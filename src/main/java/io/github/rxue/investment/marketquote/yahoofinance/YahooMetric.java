@@ -8,7 +8,8 @@ enum YahooMetric {
     REGULAR_MARKET_CHANGE_PERCENT("price", "regularMarketChangePercent", NumberWithFormat.class),
     CURRENCY("price", "currency", String.class),
     TRAILING_PE("summaryDetail", "trailingPE", NumberWithFormat.class),
-    DIVIDEND_YIELD("summaryDetail", "dividendYield", NumberWithFormat.class);
+    DIVIDEND_YIELD("summaryDetail", "dividendYield", NumberWithFormat.class),
+    DIVIDEND_PAYOUT_RATIO("summaryDetail", "payoutRatio", NumberWithFormat.class);
 
     private final String v10Module;
     private final String name;

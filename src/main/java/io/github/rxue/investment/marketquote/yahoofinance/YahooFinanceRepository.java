@@ -9,10 +9,8 @@ import java.math.BigDecimal;
 import java.net.http.HttpClient;
 import java.util.*;
 
-import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.*;
 import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.DIVIDEND_YIELD;
 import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.TRAILING_PE;
-import static java.util.stream.Collectors.toMap;
 
 public class YahooFinanceRepository implements Repository {
     private final QuoteFetcher quoteFetcher;
@@ -43,11 +41,12 @@ public class YahooFinanceRepository implements Repository {
             case COMPANY_NAME -> (String) yahooMetricValues.get(YahooMetric.LONG_NAME);
             case LATEST_MARKET_PRICE -> {
                 BigDecimal priceValue = ((NumberWithFormat) yahooMetricValues.get(YahooMetric.REGULAR_MARKET_PRICE)).value();
-                yield new QuotePrice(priceValue, (String) yahooMetricValues.get(CURRENCY));
+                yield new QuotePrice(priceValue, (String) yahooMetricValues.get(YahooMetric.CURRENCY));
             }
             case REGULAR_MARKET_CHANGE_PERCENT -> (NumberWithFormat) yahooMetricValues.get(YahooMetric.REGULAR_MARKET_CHANGE_PERCENT);
             case TRAILING_PE -> (NumberWithFormat) yahooMetricValues.get(YahooMetric.TRAILING_PE);
             case DIVIDEND_YIELD -> (NumberWithFormat) yahooMetricValues.get(YahooMetric.DIVIDEND_YIELD);
+            case DIVIDEND_PAYOUT_RATIO -> (NumberWithFormat) yahooMetricValues.get(YahooMetric.DIVIDEND_PAYOUT_RATIO);
         };
     }
 
@@ -55,14 +54,15 @@ public class YahooFinanceRepository implements Repository {
         Set<YahooMetric> result = new HashSet<>();
         for (QuoteMetric quoteMetric : quoteMetrics) {
             switch(quoteMetric) {
-                case COMPANY_NAME -> result.add(LONG_NAME);
+                case COMPANY_NAME -> result.add(YahooMetric.LONG_NAME);
                 case LATEST_MARKET_PRICE -> {
-                    result.add(REGULAR_MARKET_PRICE);
-                    result.add(CURRENCY);
+                    result.add(YahooMetric.REGULAR_MARKET_PRICE);
+                    result.add(YahooMetric.CURRENCY);
                 }
-                case REGULAR_MARKET_CHANGE_PERCENT -> result.add(REGULAR_MARKET_CHANGE_PERCENT);
-                case TRAILING_PE -> result.add(TRAILING_PE);
-                case DIVIDEND_YIELD -> result.add(DIVIDEND_YIELD);
+                case REGULAR_MARKET_CHANGE_PERCENT -> result.add(YahooMetric.REGULAR_MARKET_CHANGE_PERCENT);
+                case TRAILING_PE -> result.add(YahooMetric.TRAILING_PE);
+                case DIVIDEND_YIELD -> result.add(YahooMetric.DIVIDEND_YIELD);
+                case DIVIDEND_PAYOUT_RATIO -> result.add(YahooMetric.DIVIDEND_PAYOUT_RATIO);
             }
         }
         return Collections.unmodifiableSet(result);

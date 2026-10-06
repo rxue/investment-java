@@ -4,7 +4,6 @@ import io.github.rxue.investment.marketquote.QuoteMetric;
 import io.github.rxue.investment.marketquote.Repository;
 import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
-import io.github.rxue.investment.vo.QuotePrice;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -15,7 +14,6 @@ import picocli.CommandLine.Spec;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -52,7 +50,9 @@ public class QuotesCommand implements Callable<Integer> {
         }
         Set<String> tickerSymbolSet = Arrays.stream(tickerSymbols.split(","))
                 .collect(toSet());
+        long findStartNanos = System.nanoTime();
         MetricValuesList valuesList = repository.findMetricValues(tickerSymbolSet, metrics);
+        double findSeconds = (System.nanoTime() - findStartNanos) / 1_000_000_000.0;
         List<MetricValues> sortedValuesList = sortBy == null ? valuesList.valuesList() : valuesList.sortedBy(sortBy);
         List<String> labels = metrics.stream().map(QuoteMetric::label).toList();
         List<List<String>> rows = sortedValuesList.stream()
@@ -65,6 +65,7 @@ public class QuotesCommand implements Callable<Integer> {
         PrintWriter out = spec.commandLine().getOut();
         out.printf(rowFormat, labels.toArray());
         rows.forEach(row -> out.printf(rowFormat, row.toArray()));
+        out.printf("Fetched in %.3f seconds%n", findSeconds);
         return 0;
     }
 }

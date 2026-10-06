@@ -7,7 +7,8 @@ public enum QuoteMetric implements Metric {
     LATEST_MARKET_PRICE("Latest market price"),
     REGULAR_MARKET_CHANGE_PERCENT("Regular market change percent"),
     TRAILING_PE("Trailing P/E"),
-    DIVIDEND_YIELD("Dividend yield");
+    DIVIDEND_YIELD("Dividend yield"),
+    DIVIDEND_PAYOUT_RATIO("Dividend payout ratio");
     private final String label;
 
     QuoteMetric(String label) {
