@@ -1,27 +1,30 @@
 package io.github.rxue.investment.marketquote.yahoofinance;
 
 enum YahooMetric {
-    REGULAR_MARKET_PRICE("price", "regularMarketPrice", YahooNumber.class);
+    REGULAR_MARKET_PRICE("price", "regularMarketPrice", YahooNumber.class),
+    CURRENCY("price", "currency", String.class),
+    TRAILING_PE("summaryDetail", "trailingPE", YahooNumber.class),
+    DIVIDEND_YIELD("summaryDetail", "dividendYield", YahooNumber.class);
 
-    private final String module;
+    private final String v10Module;
     private final String name;
-    private final Class<?> typeClass;
+    private final Class<? extends Comparable<?>> typeClass;
 
-    YahooMetric(String module, String name, Class<?> typeClass) {
-        this.module = module;
+    YahooMetric(String v10Module, String name, Class<? extends Comparable<?>> typeClass) {
+        this.v10Module = v10Module;
         this.name = name;
         this.typeClass = typeClass;
     }
 
-    String module() {
-        return module;
+    String v10Module() {
+        return v10Module;
     }
 
     String metricName() {
         return name;
     }
 
-    Class<?> typeClass() {
+    Class<? extends Comparable<?>> typeClass() {
         return typeClass;
     }
 }

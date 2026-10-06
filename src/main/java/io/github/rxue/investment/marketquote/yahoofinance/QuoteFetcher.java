@@ -12,8 +12,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Set;
 
-public class QuoteFetcher {
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
+
+class QuoteFetcher {
     private static final String COOKIE_URL = "https://fc.yahoo.com";
     private static final String CRUMB_URL = "https://query2.finance.yahoo.com/v1/test/getcrumb";
     private static final String QUOTE_SUMMARY_URL = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/";
@@ -35,13 +41,10 @@ public class QuoteFetcher {
     }
 
     /**
-     * The return type is inferred from the assignment target and is not checked at compile time:
-     * it must match the type of the given metric, otherwise a ClassCastException is thrown at the call site.
+     * @return an instance of the type class of the given metric
      */
-    @SuppressWarnings("unchecked")
-    <T> T fetch(String securityId, YahooMetric metric) {
-        String module = metric.module();
-        final URI uri = quoteSummaryUri(module, securityId);
+    Map<YahooMetric,Comparable<?>> fetch(String securityId, Set<YahooMetric> metrics) {
+        final URI uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId);
         HttpResponse<String> response = sendRequest(uri);
         if (response.statusCode() == 401) {
             // the crumb has expired
@@ -51,15 +54,25 @@ public class QuoteFetcher {
         JsonNode quoteSummary = objectMapper.readTree(response.body()).path("quoteSummary");
         JsonNode error = quoteSummary.path("error");
         if (response.statusCode() != 200 || !error.isMissingNode() && !error.isNull()) {
-            throw new IllegalStateException("Yahoo Finance request for " + securityId+ "/" + module
+            throw new IllegalStateException("Yahoo Finance request for " + uri
                     + " failed with status " + response.statusCode() + ": " + error.path("description").asString(response.body()));
         }
-        JsonNode value = quoteSummary.path("result").path(0).path(module).path(metric.metricName());
-        return (T) objectMapper.treeToValue(value, metric.typeClass());
+        return getValues(quoteSummary, metrics);
+    }
+    private Comparable<?> getValue(JsonNode quoteSummary, YahooMetric metric) {
+        JsonNode value = quoteSummary.path("result").path(0).path(metric.v10Module()).path(metric.metricName());
+        return objectMapper.treeToValue(value, metric.typeClass());
+    }
+    Map<YahooMetric,Comparable<?>> getValues(JsonNode quoteSummary, Set<YahooMetric> yahooMetrics) {
+        return yahooMetrics.stream()
+                .map(yahooMetric -> new AbstractMap.SimpleImmutableEntry<>(yahooMetric, getValue(quoteSummary, yahooMetric)))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private URI quoteSummaryUri(String module, String securityId) {
-        return URI.create(QUOTE_SUMMARY_URL + encode(securityId) + "?modules=" + encode(module) + "&crumb=" + encode(crumb()));
+
+
+    private URI quoteSummaryUri(String modules, String securityId) {
+        return URI.create(QUOTE_SUMMARY_URL + encode(securityId) + "?modules=" + encode(modules) + "&crumb=" + encode(crumb()));
     }
 
     private String crumb() {
@@ -93,5 +106,13 @@ public class QuoteFetcher {
 
     private static String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    private static String commaDelimitedModules(Set<YahooMetric> metrics) {
+        return metrics.stream()
+                .map(YahooMetric::v10Module)
+                .distinct()
+                .sorted()
+                .collect(joining(","));
     }
 }
