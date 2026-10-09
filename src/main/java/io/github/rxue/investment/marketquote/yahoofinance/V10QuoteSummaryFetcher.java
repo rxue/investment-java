@@ -18,9 +18,8 @@ import io.github.rxue.investment.vo.NumberWithFormat;
 import tools.jackson.databind.node.MissingNode;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
 
-class QuoteFetcher {
+class V10QuoteSummaryFetcher {
     private static final String COOKIE_URL = "https://fc.yahoo.com";
     private static final String CRUMB_URL = "https://query2.finance.yahoo.com/v1/test/getcrumb";
     private static final String QUOTE_SUMMARY_URL = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/";
@@ -32,7 +31,7 @@ class QuoteFetcher {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private String crumb;
 
-    public QuoteFetcher(HttpClient httpClient) {
+    public V10QuoteSummaryFetcher(HttpClient httpClient) {
         this.httpClient = httpClient;
         /*this.httpClient = HttpClient.newBuilder()
                 .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
@@ -63,7 +62,8 @@ class QuoteFetcher {
     Object getValue(JsonNode quoteSummary, YahooMetric metric) {
         JsonNode value = quoteSummary.path("result").path(0).path(metric.v10Module())
                 .path(metric.metricName());
-        if (value instanceof MissingNode) return null;
+        // isEmpty() is true for any non-container node such as a string, so it must only be applied to an object
+        if (value instanceof MissingNode || value.isObject() && value.isEmpty()) return null;
         if (metric.typeClass() == NumberWithFormat.class) {
             return new NumberWithFormat(value.path("raw").decimalValue(),
                     value.path("fmt").asString());

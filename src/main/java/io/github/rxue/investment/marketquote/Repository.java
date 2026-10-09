@@ -1,15 +1,17 @@
 package io.github.rxue.investment.marketquote;
 
-import io.github.rxue.investment.vo.Metric;
 import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
+import io.github.rxue.investment.vo.QuotePrice;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public interface Repository {
+    QuotePrice findClosePrice(String securityId, LocalDate date, String currency);
     Map<QuoteMetric,Comparable<?>> findMetricValues(String securityId, Set<QuoteMetric> quoteMetrics);
     default MetricValuesList findMetricValues(Set<String> securityIds, Set<QuoteMetric> quoteMetrics) {
         List<MetricValues> result = securityIds.stream()

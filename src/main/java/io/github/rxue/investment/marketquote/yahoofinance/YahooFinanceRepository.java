@@ -1,34 +1,52 @@
 package io.github.rxue.investment.marketquote.yahoofinance;
 
+import io.github.rxue.investment.fx.FxRateFetcher;
 import io.github.rxue.investment.marketquote.QuoteMetric;
 import io.github.rxue.investment.marketquote.Repository;
 import io.github.rxue.investment.vo.QuotePrice;
 import io.github.rxue.investment.vo.NumberWithFormat;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.http.HttpClient;
+import java.time.LocalDate;
 import java.util.*;
 
-import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.DIVIDEND_YIELD;
-import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.TRAILING_PE;
-
 public class YahooFinanceRepository implements Repository {
-    private final QuoteFetcher quoteFetcher;
-
+    private final FxRateFetcher fxRateFetcher;
+    private final V10QuoteSummaryFetcher v10QuoteSummaryFetcher;
+    private final V8ChartFetcher v8ChartFetcher;
     /**
      * @param httpClient must have a cookie handler, Yahoo Finance requires the session cookie
      */
-    public YahooFinanceRepository(HttpClient httpClient) {
-        this(new QuoteFetcher(httpClient));
+    public YahooFinanceRepository(FxRateFetcher fxRateFetcher, HttpClient httpClient) {
+        this(fxRateFetcher, new V10QuoteSummaryFetcher(httpClient), new V8ChartFetcher(httpClient));
     }
 
-    YahooFinanceRepository(QuoteFetcher quoteFetcher) {
-        this.quoteFetcher = quoteFetcher;
+    YahooFinanceRepository(FxRateFetcher fxRateFetcher, V10QuoteSummaryFetcher v10QuoteSummaryFetcher, V8ChartFetcher v8ChartFetcher) {
+        this.fxRateFetcher = fxRateFetcher;
+        this.v10QuoteSummaryFetcher = v10QuoteSummaryFetcher;
+        this.v8ChartFetcher = v8ChartFetcher;
+    }
+
+    @Override
+    public QuotePrice findClosePrice(String securityId, LocalDate date, String currency) {
+        QuotePrice originalPrice = v8ChartFetcher.fetchClosePrice(securityId, date)
+                .right();
+        String originalCurrency = originalPrice.currency();
+        if (Objects.equals(currency, originalCurrency)) {
+            return originalPrice;
+        } else {
+            BigDecimal originalPriceValue = originalPrice.value();
+            BigDecimal fxRate = fxRateFetcher.fetchRate(currency, originalCurrency, date)
+                    .right();
+            return new QuotePrice(originalPriceValue.divide(fxRate, 2, RoundingMode.HALF_UP), currency);
+        }
     }
 
     @Override
     public Map<QuoteMetric,Comparable<?>> findMetricValues(String securityId, Set<QuoteMetric> quoteMetrics) {
-        Map<YahooMetric,Object> yahooMetricValues = quoteFetcher.fetch(securityId, allNeededYahooMetrics(quoteMetrics));
+        Map<YahooMetric,Object> yahooMetricValues = v10QuoteSummaryFetcher.fetch(securityId, allNeededYahooMetrics(quoteMetrics));
         Map<QuoteMetric,Comparable<?>> resultValues = new HashMap<>();
         for (QuoteMetric quoteMetric : quoteMetrics) {
             resultValues.put(quoteMetric, getQuoteMetricValue(quoteMetric, yahooMetricValues));
