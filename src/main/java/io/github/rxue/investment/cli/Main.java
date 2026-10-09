@@ -1,5 +1,6 @@
 package io.github.rxue.investment.cli;
 
+import io.github.rxue.investment.fx.ecb.ECBFxRateFetcher;
 import io.github.rxue.investment.marketquote.Repository;
 import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceRepository;
 import picocli.CommandLine;
@@ -23,7 +24,7 @@ public class Main implements Runnable {
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
-        Repository repository = new YahooFinanceRepository(httpClient);
+        Repository repository = new YahooFinanceRepository(new ECBFxRateFetcher(httpClient), httpClient);
         int exitCode = new CommandLine(new Main())
                 .addSubcommand(new QuotesCommand(repository))
                 .setCaseInsensitiveEnumValuesAllowed(true)
