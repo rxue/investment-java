@@ -23,7 +23,7 @@ public class TradeMatcher {
         }
         return Collections.unmodifiableMap(result);
     }
-    TradeMatchResult matchInFIFO(List<Trade> tradeList) {
+    public TradeMatchResult matchInFIFO(List<Trade> tradeList) {
         Map<String,LotsMatchResult> result = new HashMap<>();
         LotMatcher lotMatcher = new LotMatcher();
         lotsBySecurityId(tradeList).forEach((securityId,lots) -> {
