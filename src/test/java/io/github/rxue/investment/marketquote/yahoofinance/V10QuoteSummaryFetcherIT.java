@@ -15,20 +15,20 @@ import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.REG
 import static io.github.rxue.investment.marketquote.yahoofinance.YahooMetric.TRAILING_PE;
 import static org.junit.jupiter.api.Assertions.*;
 
-class QuoteFetcherIT {
+class V10QuoteSummaryFetcherIT {
     private final HttpClient httpClient = HttpClient.newBuilder()
             .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(10))
             .build();
-    private final QuoteFetcher quoteFetcher = new QuoteFetcher(httpClient);
+    private final V10QuoteSummaryFetcher v10QuoteSummaryFetcher = new V10QuoteSummaryFetcher(httpClient);
 
     @Test
     void fetch_metricsOfMultipleModules() {
         // REGULAR_MARKET_PRICE and CURRENCY are in module price, TRAILING_PE is in module summaryDetail
         Set<YahooMetric> metrics = Set.of(REGULAR_MARKET_PRICE, CURRENCY, TRAILING_PE);
 
-        Map<YahooMetric,Object> values = quoteFetcher.fetch("AAPL", metrics);
+        Map<YahooMetric,Object> values = v10QuoteSummaryFetcher.fetch("AAPL", metrics);
 
         assertEquals(metrics, values.keySet());
         NumberWithFormat regularMarketPrice = (NumberWithFormat) values.get(REGULAR_MARKET_PRICE);
