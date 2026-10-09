@@ -11,7 +11,7 @@ public class TradeMatcher {
     private static Lot toLot(Trade trade) {
         LocalDate date = trade.date();
         int shareAmount = trade.shareAmount();
-        long centValue = trade.cents();
+        long centValue = Math.abs(trade.cents());
         return trade.action() == BUY ? new Lot.Buy(date, shareAmount, centValue) : new Lot.Sell(date, shareAmount, centValue);
     }
     private static Map<String,List<Lot>> lotsBySecurityId(List<Trade> tradeList) {
