@@ -1,5 +1,7 @@
 package io.github.rxue.investment.lotsmatching;
 
+import io.github.rxue.investment.vo.Pair;
+
 import java.time.LocalDate;
 
 public sealed interface Lot {
@@ -12,6 +14,11 @@ public sealed interface Lot {
     record Buy(LocalDate date, int shareAmount, long valueInCent) implements Lot {
         public Buy {
             validate(shareAmount, valueInCent);
+        }
+        Pair<Buy,Buy> remove(int amount) {
+            long removedValueInCent = (valueInCent * amount) / shareAmount;
+            Buy removed = new Buy(date, amount, removedValueInCent);
+            return new Pair<>(new Buy(date, shareAmount - amount, valueInCent - removedValueInCent), removed);
         }
     }
     record Sell(LocalDate date, int shareAmount, long valueInCent) implements Lot {
