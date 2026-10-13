@@ -20,8 +20,8 @@ class LotMatcher {
                 matchedBuyLots.add(poppedBuyLot);
                 return new SellMatch(sellLot, Collections.unmodifiableList(matchedBuyLots));
             } else {
-                Pair<Lot.Buy, Lot.Buy> resultLots = poppedBuyLot.remove(remainingShareAmount);
-                matchedBuyLots.add(resultLots.right());//?
+                Pair<Lot.Buy,Lot.Buy> resultLots = poppedBuyLot.remove(remainingShareAmount);
+                matchedBuyLots.add(resultLots.right());
                 remainingLots.add(resultLots.left());
                 return new SellMatch(sellLot, Collections.unmodifiableList(matchedBuyLots));
             }
