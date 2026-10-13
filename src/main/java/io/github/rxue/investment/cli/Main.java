@@ -1,8 +1,7 @@
 package io.github.rxue.investment.cli;
 
-import io.github.rxue.investment.fx.ecb.ECBFxRateFetcher;
-import io.github.rxue.investment.marketquote.Repository;
-import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceRepository;
+import io.github.rxue.investment.marketquote.SearchService;
+import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceSearchService;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -24,9 +23,9 @@ public class Main implements Runnable {
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
-        Repository repository = new YahooFinanceRepository(new ECBFxRateFetcher(httpClient), httpClient);
+        SearchService searchService = new YahooFinanceSearchService(httpClient, "EUR");
         int exitCode = new CommandLine(new Main())
-                .addSubcommand(new QuotesCommand(repository))
+                .addSubcommand(new QuotesCommand(searchService))
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .execute(args);
         System.exit(exitCode);
