@@ -5,7 +5,7 @@
 
   <groupId>io.github.rxue</groupId>
   <artifactId>investment</artifactId>
-  <version>1.0.4-beta</version>
+  <version>1.0.5-beta</version>
   <packaging>jar</packaging>
   <name>investment</name>
   <description>Command line tool for fetching quote metrics of securities from Yahoo Finance</description>

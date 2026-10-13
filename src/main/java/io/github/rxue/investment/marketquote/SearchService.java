@@ -20,6 +20,8 @@ public interface SearchService {
         return new MetricValuesList(result);
     }
     private MetricValues toMetricValues(String securityId, Map<QuoteMetric,Comparable<?>> quoteMetricValues) {
-        return new MetricValues(securityId, Collections.unmodifiableMap(quoteMetricValues));
+        return new MetricValues.Builder(securityId)
+                .addAll(quoteMetricValues)
+                .build();
     }
 }
