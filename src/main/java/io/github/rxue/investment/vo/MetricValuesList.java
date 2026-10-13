@@ -2,8 +2,9 @@ package io.github.rxue.investment.vo;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
-public record MetricValuesList(List<MetricValues> valuesList) {
+public record MetricValuesList(Map<String,MetricValues> valuesBySecurityId) {
     /**
      * @return values sorted ascending by the value of the given metric, missing (null) values are ordered last
      */
@@ -12,6 +13,10 @@ public record MetricValuesList(List<MetricValues> valuesList) {
         Comparator<MetricValues> byMetricValue = Comparator.comparing(
                 metricValues -> (Comparable<Object>) metricValues.get(metric),
                 Comparator.nullsLast(Comparator.naturalOrder()));
-        return valuesList.stream().sorted(byMetricValue).toList();
+        return valuesBySecurityId.values().stream().sorted(byMetricValue).toList();
+    }
+    public Object getMetricValue(String securityId, Metric metric) {
+        return valuesBySecurityId.get(securityId)
+                .get(metric);
     }
 }
