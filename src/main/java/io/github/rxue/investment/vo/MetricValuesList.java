@@ -15,6 +15,10 @@ public record MetricValuesList(Map<String,MetricValues> valuesBySecurityId) {
                 Comparator.nullsLast(Comparator.naturalOrder()));
         return valuesBySecurityId.values().stream().sorted(byMetricValue).toList();
     }
+    public List<MetricValues> valuesList() {
+        return valuesBySecurityId.values().stream()
+                .toList();
+    }
     public Object getMetricValue(String securityId, Metric metric) {
         return valuesBySecurityId.get(securityId)
                 .get(metric);
