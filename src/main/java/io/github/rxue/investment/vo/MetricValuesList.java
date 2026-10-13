@@ -19,8 +19,9 @@ public record MetricValuesList(Map<String,MetricValues> valuesBySecurityId) {
         return valuesBySecurityId.values().stream()
                 .toList();
     }
-    public Object getMetricValue(String securityId, Metric metric) {
-        return valuesBySecurityId.get(securityId)
+    public <T> T getMetricValue(String securityId, Metric metric, Class<T> valueType) {
+        Comparable<?> comparableValue = valuesBySecurityId.get(securityId)
                 .get(metric);
+        return valueType.cast(comparableValue);
     }
 }
