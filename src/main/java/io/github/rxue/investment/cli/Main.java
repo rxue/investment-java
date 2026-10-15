@@ -18,14 +18,8 @@ public class Main implements Runnable {
     private CommandSpec spec;
 
     public static void main(String[] args) {
-        HttpClient httpClient = HttpClient.newBuilder()
-                .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .connectTimeout(Duration.ofSeconds(10))
-                .build();
-        SearchService searchService = new YahooFinanceSearchService(httpClient, "EUR");
         int exitCode = new CommandLine(new Main())
-                .addSubcommand(new QuotesCommand(searchService))
+                .addSubcommand(new QuotesCommand())
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .execute(args);
         System.exit(exitCode);

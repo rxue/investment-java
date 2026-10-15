@@ -19,7 +19,7 @@ public interface SearchService {
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new MetricValuesList(result);
     }
-    private MetricValues toMetricValues(String securityId, Map<QuoteMetric,Comparable<?>> quoteMetricValues) {
+    static MetricValues toMetricValues(String securityId, Map<QuoteMetric,Comparable<?>> quoteMetricValues) {
         return new MetricValues.Builder(securityId)
                 .addAll(quoteMetricValues)
                 .build();

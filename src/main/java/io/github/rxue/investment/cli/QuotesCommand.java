@@ -2,6 +2,8 @@ package io.github.rxue.investment.cli;
 
 import io.github.rxue.investment.marketquote.QuoteMetric;
 import io.github.rxue.investment.marketquote.SearchService;
+import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceConcurrentSearchService;
+import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceSearchService;
 import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
 import org.apache.commons.csv.CSVFormat;
@@ -22,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,7 +32,6 @@ import static java.util.stream.Collectors.toSet;
 
 @Command(name = "quotes", description = "Prints quote metrics of a security", mixinStandardHelpOptions = true)
 public class QuotesCommand implements Callable<Integer> {
-    private final SearchService searchService;
 
     @Spec
     private CommandSpec spec;
@@ -44,10 +46,9 @@ public class QuotesCommand implements Callable<Integer> {
     @Option(names = "--sort-by", paramLabel = "METRIC",
             description = "Metric to sort the result ascending by, must be one of METRICS")
     private QuoteMetric sortBy;
-
-    public QuotesCommand(SearchService searchService) {
-        this.searchService = searchService;
-    }
+    @Option(names = "--threads", paramLabel = "AMOUNT_OF_THREAD",
+            description = "Amount of threads to use")
+    private int threads;
 
     @Override
     public Integer call() {
@@ -56,6 +57,7 @@ public class QuotesCommand implements Callable<Integer> {
         }
         Set<String> tickerSymbolSet = tickerSymbols();
         long findStartNanos = System.nanoTime();
+        SearchService searchService = new YahooFinanceSearchService("EUR");
         MetricValuesList valuesList = searchService.findMetricValues(tickerSymbolSet, metrics);
         double findSeconds = (System.nanoTime() - findStartNanos) / 1_000_000_000.0;
         List<MetricValues> sortedValuesList = sortBy == null ? valuesList.valuesList() : valuesList.sortedBy(sortBy);
@@ -72,6 +74,12 @@ public class QuotesCommand implements Callable<Integer> {
         rows.forEach(row -> out.printf(rowFormat, row.toArray()));
         out.printf("Fetched in %.3f seconds%n", findSeconds);
         return 0;
+    }
+    private static SearchService getSearchService(int threads) {
+        if (threads > 1) {
+            return new YahooFinanceConcurrentSearchService(threads, "EUR", Executors.newFixedThreadPool(threads));
+        }
+        return new YahooFinanceSearchService("EUR");
     }
 
     /**

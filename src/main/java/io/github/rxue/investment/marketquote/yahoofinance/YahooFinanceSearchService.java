@@ -10,7 +10,10 @@ import io.github.rxue.investment.vo.QuotePrice;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.http.HttpClient;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -18,6 +21,16 @@ public class YahooFinanceSearchService implements SearchService {
     private final V10QuoteSummaryFetcher v10QuoteSummaryFetcher;
     private final FxRateFetcher fxRateFetcher;
     private final String reportCurrency;
+    public YahooFinanceSearchService(String reportCurrency) {
+        this(newHttpClient(), reportCurrency);
+    }
+    public static HttpClient newHttpClient() {
+        return HttpClient.newBuilder()
+                .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+    }
     public YahooFinanceSearchService(HttpClient httpClient, String reportCurrency) {
         this(new V10QuoteSummaryFetcher(httpClient), new ECBFxRateFetcher(httpClient), reportCurrency);
     }
