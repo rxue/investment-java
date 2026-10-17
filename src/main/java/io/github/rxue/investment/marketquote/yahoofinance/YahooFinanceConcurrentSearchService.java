@@ -1,18 +1,16 @@
 package io.github.rxue.investment.marketquote.yahoofinance;
 
+import io.github.rxue.investment.marketquote.BatchSearchService;
 import io.github.rxue.investment.marketquote.QuoteMetric;
 import io.github.rxue.investment.marketquote.SearchService;
 import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
-public class YahooFinanceConcurrentSearchService implements SearchService {
+public class YahooFinanceConcurrentSearchService implements BatchSearchService {
     private final List<SearchService> slaveServices;
     private final ExecutorService executorService;
     public YahooFinanceConcurrentSearchService(int threads, String reportCurrency, ExecutorService executorService) {
@@ -21,16 +19,6 @@ public class YahooFinanceConcurrentSearchService implements SearchService {
         IntStream.range(0, threads).forEach(i -> slaveServices.add(new YahooFinanceSearchService(reportCurrency)));
     }
 
-
-    @Override
-    public Map<QuoteMetric, Comparable<?>> findMetricValues(String securityId, Set<QuoteMetric> quoteMetrics) {
-        Future<Map<QuoteMetric,Comparable<?>>> singleResult = executorService.submit(() -> slaveServices.get(0).findMetricValues(securityId, quoteMetrics));
-        try {
-            return singleResult.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
     @Override
     public MetricValuesList findMetricValues(Set<String> securityIds, Set<QuoteMetric> quoteMetrics) {
         List<String> ids = new ArrayList<>(securityIds);

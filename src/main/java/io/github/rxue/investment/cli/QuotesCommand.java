@@ -1,5 +1,6 @@
 package io.github.rxue.investment.cli;
 
+import io.github.rxue.investment.marketquote.BatchSearchService;
 import io.github.rxue.investment.marketquote.QuoteMetric;
 import io.github.rxue.investment.marketquote.SearchService;
 import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceConcurrentSearchService;
@@ -8,7 +9,6 @@ import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -57,7 +57,7 @@ public class QuotesCommand implements Callable<Integer> {
         }
         Set<String> tickerSymbolSet = tickerSymbols();
         long findStartNanos = System.nanoTime();
-        SearchService searchService = new YahooFinanceSearchService("EUR");
+        BatchSearchService searchService = getSearchService(threads);
         MetricValuesList valuesList = searchService.findMetricValues(tickerSymbolSet, metrics);
         double findSeconds = (System.nanoTime() - findStartNanos) / 1_000_000_000.0;
         List<MetricValues> sortedValuesList = sortBy == null ? valuesList.valuesList() : valuesList.sortedBy(sortBy);
@@ -75,24 +75,30 @@ public class QuotesCommand implements Callable<Integer> {
         out.printf("Fetched in %.3f seconds%n", findSeconds);
         return 0;
     }
-    private static SearchService getSearchService(int threads) {
+    private static BatchSearchService getSearchService(int threads) {
         if (threads > 1) {
             return new YahooFinanceConcurrentSearchService(threads, "EUR", Executors.newFixedThreadPool(threads));
         }
-        return new YahooFinanceSearchService("EUR");
+        //return new YahooFinanceSearchService("EUR");
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * @return ticker symbols given directly, or all the non-blank values of the csv file in case a csv file path is given
+     * @return ticker symbols given directly, or the non-blank values of the first column of the csv file, excluding the header row,
+     * in case a csv file path is given
      */
     private Set<String> tickerSymbols() {
         if (!tickerSymbolsOrCsv.toLowerCase().endsWith(".csv")) {
             return Arrays.stream(tickerSymbolsOrCsv.split(","))
                     .collect(toSet());
         }
-        try (CSVParser csvParser = CSVParser.parse(Path.of(tickerSymbolsOrCsv), StandardCharsets.UTF_8, CSVFormat.DEFAULT)) {
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .get();
+        try (CSVParser csvParser = CSVParser.parse(Path.of(tickerSymbolsOrCsv), StandardCharsets.UTF_8, csvFormat)) {
             return csvParser.stream()
-                    .flatMap(CSVRecord::stream)
+                    .map(csvRecord -> csvRecord.get(0))
                     .map(String::trim)
                     .filter(tickerSymbol -> !tickerSymbol.isEmpty())
                     .collect(toSet());

@@ -2,6 +2,7 @@ package io.github.rxue.investment.marketquote.yahoofinance;
 
 import io.github.rxue.investment.fx.FxRateFetcher;
 import io.github.rxue.investment.fx.ecb.ECBFxRateFetcher;
+import io.github.rxue.investment.marketquote.BatchSearchService;
 import io.github.rxue.investment.marketquote.QuoteMetric;
 import io.github.rxue.investment.marketquote.SearchService;
 import io.github.rxue.investment.vo.NumberWithFormat;
