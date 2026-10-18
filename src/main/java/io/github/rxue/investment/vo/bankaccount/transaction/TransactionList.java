@@ -9,14 +9,16 @@ import java.util.List;
  * @param transactionList
  */
 public record TransactionList(List<Transaction> transactionList) {
-    public List<Dividend> dividends() {
+    public List<Dividend> dividendsSince(LocalDate inclusiveStartDate) {
         return transactionList.stream()
+                .filter(tr -> !tr.date().isBefore(inclusiveStartDate))
                 .filter(Dividend.class::isInstance)
                 .map(Dividend.class::cast)
                 .toList();
     }
-    public List<Expense> expenses() {
+    public List<Expense> expensesSince(LocalDate inclusiveStartDate) {
         return transactionList.stream()
+                .filter(tr -> !tr.date().isBefore(inclusiveStartDate))
                 .filter(Expense.class::isInstance)
                 .map(Expense.class::cast)
                 .toList();
