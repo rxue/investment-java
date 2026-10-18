@@ -1,5 +1,6 @@
 package io.github.rxue.investment.vo.bankaccount.transaction;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -25,5 +26,11 @@ public record TransactionList(List<Transaction> transactionList) {
                 .filter(Trade.class::isInstance)
                 .map(Trade.class::cast)
                 .toList();
+    }
+    public TransactionList transactionsBy(LocalDate inclusiveEndDate) {
+        List<Transaction> result = transactionList.stream()
+                .filter(tr -> !tr.date().isAfter(inclusiveEndDate))
+                .toList();
+        return new TransactionList(result);
     }
 }
