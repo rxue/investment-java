@@ -29,6 +29,12 @@ public record TransactionList(List<Transaction> transactionList) {
                 .map(Trade.class::cast)
                 .toList();
     }
+    public List<Deposit> deposits() {
+        return transactionList.stream()
+                .filter(Deposit.class::isInstance)
+                .map(Deposit.class::cast)
+                .toList();
+    }
     public TransactionList transactionsBy(LocalDate inclusiveEndDate) {
         List<Transaction> result = transactionList.stream()
                 .filter(tr -> !tr.date().isAfter(inclusiveEndDate))
