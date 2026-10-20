@@ -17,10 +17,14 @@ public record SellMatches(Map<String,List<SellMatch>> matchesBySecurity) {
                 .filter(m -> !m.sellLot().date().isBefore(inclusiveStartDate))
                 .toList();
     }
-    public long totalGainInCent() {
-        return matchesBySecurity.values().stream()
-                .flatMap(List::stream)
-                .mapToLong(SellMatch::gainInCent)
-                .sum();
+    public SellMatches before(LocalDate inclusiveStartDate) {
+        Map<String,List<SellMatch>> filteredResult = matchesBySecurity.entrySet().stream()
+                .collect(toMap(Map.Entry::getKey, e -> before(e.getValue(), inclusiveStartDate)));
+        return new SellMatches(filteredResult);
+    }
+    private static List<SellMatch> before(List<SellMatch> matches, LocalDate exclusiveEndDate) {
+        return matches.stream()
+                .filter(m -> m.sellLot().date().isBefore(exclusiveEndDate))
+                .toList();
     }
 }
