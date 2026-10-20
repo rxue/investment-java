@@ -27,4 +27,10 @@ public record SellMatches(Map<String,List<SellMatch>> matchesBySecurity) {
                 .filter(m -> m.sellLot().date().isBefore(exclusiveEndDate))
                 .toList();
     }
+    public long totalGainInCent() {
+        return matchesBySecurity.values().stream()
+                .flatMap(List::stream)
+                .mapToLong(SellMatch::gainInCent)
+                .sum();
+    }
 }
