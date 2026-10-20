@@ -18,20 +18,15 @@ public class TradeMatchResult {
                 .mapToLong(LotsMatchResult::openLotsCostInCent)
                 .sum();
     }
-    public Map<String,Integer> sharesAmountBySecurity() {
+    public Map<String,Integer> openShareAmountBySecurity() {
         return lotsMatchResultMap.entrySet().stream()
                 .collect(toMap(Map.Entry::getKey, e -> e.getValue().openShareAmount()));
     }
 
-    /**
-     * Get all  the sell matches by security ID in or after the given date
-     *
-     * @param date
-     * @return
-     */
-    public Map<String, List<SellMatch>> sellMatchesSince(LocalDate date) {
-        return lotsMatchResultMap.entrySet().stream()
-                .collect(toMap(Map.Entry::getKey, e -> e.getValue().sellMatchesSince(date)));
+    public SellMatches sellMatches() {
+        Map<String,List<SellMatch>> result = lotsMatchResultMap.entrySet().stream()
+                .collect(toMap(Map.Entry::getKey, e -> e.getValue().sellMatches()));
+        return new SellMatches(result);
     }
 
 }
