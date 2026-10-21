@@ -33,9 +33,15 @@ public record TransactionList(List<Transaction> transactionList) {
                 .map(Deposit.class::cast)
                 .toList();
     }
-    public TransactionList transactionsBy(LocalDate inclusiveEndDate) {
+    public TransactionList by(LocalDate inclusiveEndDate) {
         List<Transaction> result = transactionList.stream()
                 .filter(tr -> !tr.date().isAfter(inclusiveEndDate))
+                .toList();
+        return new TransactionList(result);
+    }
+    public TransactionList since(LocalDate inclusiveDate) {
+        List<Transaction> result = transactionList.stream()
+                .filter(tr -> !tr.date().isBefore(inclusiveDate))
                 .toList();
         return new TransactionList(result);
     }

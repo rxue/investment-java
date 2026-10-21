@@ -46,8 +46,8 @@ public class TransactionListPublicApiTest {
     }
 
     @Test
-    void transactionsBy_includes_end_date() {
-        TransactionList result = TRANSACTIONS.transactionsBy(LocalDate.of(2026, 1, 14));
+    void by_includes_end_date() {
+        TransactionList result = TRANSACTIONS.by(LocalDate.of(2026, 1, 14));
 
         assertEquals(List.of(DEPOSIT, BUY, SERVICE_CHARGE, SELL), result.transactionList());
     }
