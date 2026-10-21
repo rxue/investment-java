@@ -2,8 +2,7 @@ package io.github.rxue.investment.cli;
 
 import io.github.rxue.investment.marketquote.BatchSearchService;
 import io.github.rxue.investment.marketquote.QuoteMetric;
-import io.github.rxue.investment.marketquote.SearchService;
-import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceConcurrentSearchService;
+import io.github.rxue.investment.marketquote.yahoofinance.ConcurrentSearchService;
 import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceSearchService;
 import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
@@ -46,9 +45,10 @@ public class QuotesCommand implements Callable<Integer> {
     @Option(names = "--sort-by", paramLabel = "METRIC",
             description = "Metric to sort the result ascending by, must be one of METRICS")
     private QuoteMetric sortBy;
-    @Option(names = "--threads", paramLabel = "AMOUNT_OF_THREAD",
-            description = "Amount of threads to use")
-    private int threads;
+
+    @Option(names = "--concurrent",
+            description = "Fetch the ticker symbols concurrently using an executor service")
+    private boolean concurrent;
 
     @Override
     public Integer call() {
@@ -57,7 +57,7 @@ public class QuotesCommand implements Callable<Integer> {
         }
         Set<String> tickerSymbolSet = tickerSymbols();
         long findStartNanos = System.nanoTime();
-        BatchSearchService searchService = getSearchService(threads);
+        BatchSearchService searchService = getSearchService(concurrent);
         MetricValuesList valuesList = searchService.findMetricValues(tickerSymbolSet, metrics);
         double findSeconds = (System.nanoTime() - findStartNanos) / 1_000_000_000.0;
         List<MetricValues> sortedValuesList = sortBy == null ? valuesList.valuesList() : valuesList.sortedBy(sortBy);
@@ -75,12 +75,12 @@ public class QuotesCommand implements Callable<Integer> {
         out.printf("Fetched in %.3f seconds%n", findSeconds);
         return 0;
     }
-    private static BatchSearchService getSearchService(int threads) {
-        if (threads > 1) {
-            return new YahooFinanceConcurrentSearchService(threads, "EUR", Executors.newFixedThreadPool(threads));
+    private static BatchSearchService getSearchService(boolean concurrent) {
+        if (concurrent) {
+            return new ConcurrentSearchService("EUR", Executors.newVirtualThreadPerTaskExecutor());
         }
-        //return new YahooFinanceSearchService("EUR");
-        throw new UnsupportedOperationException();
+        else
+            return new YahooFinanceSearchService("EUR");
     }
 
     /**

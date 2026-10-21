@@ -51,4 +51,10 @@ public class TransactionListPublicApiTest {
 
         assertEquals(List.of(DEPOSIT, BUY, SERVICE_CHARGE, SELL), result.transactionList());
     }
+    @Test
+    void since_includes_start_date() {
+        TransactionList result = TRANSACTIONS.since(LocalDate.of(2026, 1, 14));
+
+        assertEquals(List.of(SELL,DIVIDEND,EXTERNAL_PAYMENT), result.transactionList());
+    }
 }
