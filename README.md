@@ -24,3 +24,11 @@ Apple Inc.   342.14 USD           39.24         0.32%
 Fetched in 0.943 seconds
 ```
 The ticker symbols can also be given as a path to a csv file, e.g. `tickers.csv`.
+
+### Concurrent fetching
+By default the ticker symbols are fetched one after another. With the `--concurrent` option they are fetched in parallel by a pool of 10 threads sharing one Yahoo Finance session, which is considerably faster for a long list of ticker symbols, e.g. from a csv file:
+```bash
+mvn -q compile exec:java \
+  -Dexec.mainClass=io.github.rxue.investment.cli.Main \
+  -Dexec.args="quotes COMPANY_NAME,LATEST_MARKET_PRICE tickers.csv --concurrent"
+```
