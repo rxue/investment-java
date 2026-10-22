@@ -2,7 +2,7 @@ package io.github.rxue.investment.marketquote.yahoofinance;
 
 import io.github.rxue.investment.fx.ecb.ECBFxRateFetcher;
 import io.github.rxue.investment.marketquote.QuoteMetric;
-import io.github.rxue.investment.marketquote.SearchService;
+import io.github.rxue.investment.marketquote.QuoteFetcher;
 import io.github.rxue.investment.vo.QuotePrice;
 import org.junit.jupiter.api.Test;
 
@@ -26,13 +26,13 @@ public class YahooFinanceServiceIT {
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(10))
             .build();
-    private final SearchService searchService = new YahooFinanceSearchService(new V10QuoteSummaryFetcher(httpClient), new ECBFxRateFetcher(httpClient),"EUR");
+    private final QuoteFetcher searchService = new YahooFinanceQuoteFetcher(new V10QuoteSummaryFetcher(httpClient), new ECBFxRateFetcher(httpClient),"EUR");
 
     @Test
     void findMetricValues_latestMarketPriceAndDividendYield() {
         Set<QuoteMetric> quoteMetrics = Set.of(LATEST_MARKET_PRICE, DIVIDEND_YIELD);
 
-        Map<QuoteMetric, Comparable<?>> values = searchService.findMetricValues("AAPL", quoteMetrics);
+        Map<QuoteMetric, Comparable<?>> values = searchService.fetch("AAPL", quoteMetrics);
 
         assertEquals(quoteMetrics, values.keySet());
         QuotePrice latestMarketQuotePrice = (QuotePrice) values.get(LATEST_MARKET_PRICE);
