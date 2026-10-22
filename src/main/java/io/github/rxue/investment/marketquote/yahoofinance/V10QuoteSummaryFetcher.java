@@ -29,6 +29,7 @@ class V10QuoteSummaryFetcher {
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Object crumbLock;
     private String crumb;
 
     public V10QuoteSummaryFetcher(HttpClient httpClient) {
@@ -38,17 +39,19 @@ class V10QuoteSummaryFetcher {
     V10QuoteSummaryFetcher(HttpClient httpClient, String crumb) {
         this.httpClient = httpClient;
         this.crumb = crumb;
+        this.crumbLock = new Object();
     }
 
     /**
      * @return an instance of the type class of the given metric
      */
     Map<YahooMetric,Object> fetch(String securityId, Set<YahooMetric> metrics) {
-        URI uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId, crumb());
+        String usedCrumb = crumb();
+        URI uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId, usedCrumb);
         HttpResponse<String> response = sendRequest(uri);
         if (response.statusCode() == 401) {
             // the crumb has expired
-            crumb = null;
+            invalidateCrumb(usedCrumb);
             uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId, crumb());
             response = sendRequest(uri);
         }
@@ -85,17 +88,26 @@ class V10QuoteSummaryFetcher {
         return URI.create(QUOTE_SUMMARY_URL + encode(securityId) + "?modules=" + encode(modules) + "&crumb=" + encode(crumb));
     }
 
-    private String crumb() {
-        if (crumb == null) {
-            // the response itself is irrelevant, the request is only made to get the session cookie
-            sendRequest(URI.create(COOKIE_URL));
-            HttpResponse<String> response = sendRequest(URI.create(CRUMB_URL));
-            if (response.statusCode() != 200 || response.body().isBlank()) {
-                throw new IllegalStateException("Failed to get the Yahoo Finance crumb, status " + response.statusCode() + ": " + response.body());
-            }
-            crumb = response.body();
+    private void invalidateCrumb(String expiredCrumb) {
+        synchronized (crumbLock) {
+            if (expiredCrumb.equals(crumb))
+                crumb = null;
         }
-        return crumb;
+    }
+
+    private String crumb() {
+        synchronized (crumbLock) {
+            if (crumb == null) {
+                // the response itself is irrelevant, the request is only made to get the session cookie
+                sendRequest(URI.create(COOKIE_URL));
+                HttpResponse<String> response = sendRequest(URI.create(CRUMB_URL));
+                if (response.statusCode() != 200 || response.body().isBlank()) {
+                    throw new IllegalStateException("Failed to get the Yahoo Finance crumb, status " + response.statusCode() + ": " + response.body());
+                }
+                crumb = response.body();
+            }
+            return crumb;
+        }
     }
 
     private HttpResponse<String> sendRequest(URI uri) {

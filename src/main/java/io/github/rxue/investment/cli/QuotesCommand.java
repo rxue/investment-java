@@ -2,7 +2,7 @@ package io.github.rxue.investment.cli;
 
 import io.github.rxue.investment.marketquote.BatchQuoteFetcher;
 import io.github.rxue.investment.marketquote.QuoteMetric;
-import io.github.rxue.investment.marketquote.yahoofinance.LegacyConcurrentQuoteFetcher;
+import io.github.rxue.investment.marketquote.yahoofinance.ConcurrentQuoteFetcher;
 import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceQuoteFetcher;
 import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
@@ -77,7 +77,7 @@ public class QuotesCommand implements Callable<Integer> {
     }
     private static BatchQuoteFetcher getSearchService(boolean concurrent) {
         if (concurrent) {
-            return new LegacyConcurrentQuoteFetcher("EUR", Executors.newFixedThreadPool(10));
+            return new ConcurrentQuoteFetcher("EUR", Executors.newFixedThreadPool(10));
         }
         else
             return new YahooFinanceQuoteFetcher("EUR");
