@@ -2,6 +2,7 @@ package io.github.rxue.investment.marketquote.yahoofinance;
 
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.http.HttpClient;
@@ -36,5 +37,17 @@ class V10QuoteSummaryFetcherIT {
         assertEquals("USD", values.get(CURRENCY));
         NumberWithFormat trailingPE = (NumberWithFormat) values.get(TRAILING_PE);
         assertTrue(trailingPE.value().signum() > 0, "trailing P/E should be positive but was " + trailingPE.value());
+    }
+
+    @Test
+    void fetch_expiredCrumb() throws ReflectiveOperationException {
+        V10QuoteSummaryFetcher v10QuoteSummaryFetcher = new V10QuoteSummaryFetcher(httpClient, "expired crumb");
+        // the first fetch gets a valid session cookie and crumb
+        v10QuoteSummaryFetcher.fetch("AAPL", Set.of(CURRENCY));
+        // Yahoo answers 401 to an expired crumb, just as to an invalid one
+
+        Map<YahooMetric,Object> values = v10QuoteSummaryFetcher.fetch("AAPL", Set.of(CURRENCY));
+
+        assertEquals("USD", values.get(CURRENCY));
     }
 }

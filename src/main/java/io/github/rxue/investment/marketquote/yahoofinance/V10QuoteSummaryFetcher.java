@@ -32,23 +32,24 @@ class V10QuoteSummaryFetcher {
     private String crumb;
 
     public V10QuoteSummaryFetcher(HttpClient httpClient) {
+        this(httpClient, null);
+    }
+
+    V10QuoteSummaryFetcher(HttpClient httpClient, String crumb) {
         this.httpClient = httpClient;
-        /*this.httpClient = HttpClient.newBuilder()
-                .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .connectTimeout(TIMEOUT)
-                .build();*/
+        this.crumb = crumb;
     }
 
     /**
      * @return an instance of the type class of the given metric
      */
     Map<YahooMetric,Object> fetch(String securityId, Set<YahooMetric> metrics) {
-        final URI uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId);
+        URI uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId, crumb());
         HttpResponse<String> response = sendRequest(uri);
         if (response.statusCode() == 401) {
             // the crumb has expired
             crumb = null;
+            uri = quoteSummaryUri(commaDelimitedModules(metrics), securityId, crumb());
             response = sendRequest(uri);
         }
         JsonNode quoteSummary = objectMapper.readTree(response.body()).path("quoteSummary");
@@ -80,8 +81,8 @@ class V10QuoteSummaryFetcher {
 
 
 
-    private URI quoteSummaryUri(String modules, String securityId) {
-        return URI.create(QUOTE_SUMMARY_URL + encode(securityId) + "?modules=" + encode(modules) + "&crumb=" + encode(crumb()));
+    private static URI quoteSummaryUri(String modules, String securityId, String crumb) {
+        return URI.create(QUOTE_SUMMARY_URL + encode(securityId) + "?modules=" + encode(modules) + "&crumb=" + encode(crumb));
     }
 
     private String crumb() {
