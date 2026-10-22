@@ -30,7 +30,7 @@ class V10QuoteSummaryFetcher {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Object crumbLock;
-    private String crumb;
+    private volatile String crumb;
 
     public V10QuoteSummaryFetcher(HttpClient httpClient) {
         this(httpClient, null);
@@ -90,12 +90,14 @@ class V10QuoteSummaryFetcher {
 
     private void invalidateCrumb(String expiredCrumb) {
         synchronized (crumbLock) {
-            if (expiredCrumb.equals(crumb))
+            if (Objects.equals(expiredCrumb, crumb))
                 crumb = null;
         }
     }
 
     private String crumb() {
+        String current = crumb;
+        if (current != null) return current;
         synchronized (crumbLock) {
             if (crumb == null) {
                 // the response itself is irrelevant, the request is only made to get the session cookie
