@@ -20,7 +20,7 @@ import static io.github.rxue.investment.marketquote.QuoteMetric.DIVIDEND_YIELD;
 import static io.github.rxue.investment.marketquote.QuoteMetric.LATEST_MARKET_PRICE;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class YahooFinanceServiceIT {
+public class YahooFinanceQuoteFetcherIT {
     private final HttpClient httpClient = HttpClient.newBuilder()
             .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
             .followRedirects(HttpClient.Redirect.NORMAL)

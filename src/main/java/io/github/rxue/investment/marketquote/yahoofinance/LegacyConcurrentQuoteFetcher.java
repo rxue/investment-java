@@ -9,10 +9,19 @@ import io.github.rxue.investment.vo.MetricValuesList;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class ConcurrentQuoteFetcher implements BatchQuoteFetcher {
+/**
+ *
+ * Currently, each thread has its own http client, separate Yahoo login on each worker thread. There is potent concurrency issues:
+ *
+ * Many threads, each fetches a cookie and a crumb before fetching any quotes.
+ * Bursts of crumb requests are what Yahoo tends to rate-limit (HTTP 429 ERROR response code). One rejected crumb fails the whole batch,
+ * and since each thread maintains its own crumb, you can't tell which ticker hit it
+ *
+ */
+public class LegacyConcurrentQuoteFetcher implements BatchQuoteFetcher {
     private final ThreadLocal<QuoteFetcher> worker;
     private final ExecutorService executorService;
-    public ConcurrentQuoteFetcher(String reportCurrency, ExecutorService executorService) {
+    public LegacyConcurrentQuoteFetcher(String reportCurrency, ExecutorService executorService) {
         this.executorService = executorService;
         this.worker = ThreadLocal.withInitial(() -> new YahooFinanceQuoteFetcher(reportCurrency));
     }

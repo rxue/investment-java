@@ -4,6 +4,6 @@ import io.github.rxue.investment.vo.MetricValuesList;
 
 import java.util.Set;
 
-public interface BatchSearchService {
-    MetricValuesList findMetricValues(Set<String> securityIds, Set<QuoteMetric> quoteMetrics);
+public interface BatchQuoteFetcher {
+    MetricValuesList fetchAll(Set<String> securityIds, Set<QuoteMetric> quoteMetrics);
 }

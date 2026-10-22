@@ -1,9 +1,9 @@
 package io.github.rxue.investment.cli;
 
-import io.github.rxue.investment.marketquote.BatchSearchService;
+import io.github.rxue.investment.marketquote.BatchQuoteFetcher;
 import io.github.rxue.investment.marketquote.QuoteMetric;
-import io.github.rxue.investment.marketquote.yahoofinance.ConcurrentSearchService;
-import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceSearchService;
+import io.github.rxue.investment.marketquote.yahoofinance.LegacyConcurrentQuoteFetcher;
+import io.github.rxue.investment.marketquote.yahoofinance.YahooFinanceQuoteFetcher;
 import io.github.rxue.investment.vo.MetricValues;
 import io.github.rxue.investment.vo.MetricValuesList;
 import org.apache.commons.csv.CSVFormat;
@@ -57,8 +57,8 @@ public class QuotesCommand implements Callable<Integer> {
         }
         Set<String> tickerSymbolSet = tickerSymbols();
         long findStartNanos = System.nanoTime();
-        BatchSearchService searchService = getSearchService(concurrent);
-        MetricValuesList valuesList = searchService.findMetricValues(tickerSymbolSet, metrics);
+        BatchQuoteFetcher searchService = getSearchService(concurrent);
+        MetricValuesList valuesList = searchService.fetchAll(tickerSymbolSet, metrics);
         double findSeconds = (System.nanoTime() - findStartNanos) / 1_000_000_000.0;
         List<MetricValues> sortedValuesList = sortBy == null ? valuesList.valuesList() : valuesList.sortedBy(sortBy);
         List<String> labels = metrics.stream().map(QuoteMetric::label).toList();
@@ -75,12 +75,12 @@ public class QuotesCommand implements Callable<Integer> {
         out.printf("Fetched in %.3f seconds%n", findSeconds);
         return 0;
     }
-    private static BatchSearchService getSearchService(boolean concurrent) {
+    private static BatchQuoteFetcher getSearchService(boolean concurrent) {
         if (concurrent) {
-            return new ConcurrentSearchService("EUR", Executors.newVirtualThreadPerTaskExecutor());
+            return new LegacyConcurrentQuoteFetcher("EUR", Executors.newFixedThreadPool(10));
         }
         else
-            return new YahooFinanceSearchService("EUR");
+            return new YahooFinanceQuoteFetcher("EUR");
     }
 
     /**

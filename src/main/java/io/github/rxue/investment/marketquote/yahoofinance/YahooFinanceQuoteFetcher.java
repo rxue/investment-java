@@ -2,9 +2,8 @@ package io.github.rxue.investment.marketquote.yahoofinance;
 
 import io.github.rxue.investment.fx.FxRateFetcher;
 import io.github.rxue.investment.fx.ecb.ECBFxRateFetcher;
-import io.github.rxue.investment.marketquote.BatchSearchService;
 import io.github.rxue.investment.marketquote.QuoteMetric;
-import io.github.rxue.investment.marketquote.SearchService;
+import io.github.rxue.investment.marketquote.QuoteFetcher;
 import io.github.rxue.investment.vo.NumberWithFormat;
 import io.github.rxue.investment.vo.Pair;
 import io.github.rxue.investment.vo.QuotePrice;
@@ -18,11 +17,11 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
 
-public class YahooFinanceSearchService implements SearchService {
+public class YahooFinanceQuoteFetcher implements QuoteFetcher {
     private final V10QuoteSummaryFetcher v10QuoteSummaryFetcher;
     private final FxRateFetcher fxRateFetcher;
     private final String reportCurrency;
-    public YahooFinanceSearchService(String reportCurrency) {
+    public YahooFinanceQuoteFetcher(String reportCurrency) {
         this(newHttpClient(), reportCurrency);
     }
     public static HttpClient newHttpClient() {
@@ -32,17 +31,17 @@ public class YahooFinanceSearchService implements SearchService {
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
     }
-    public YahooFinanceSearchService(HttpClient httpClient, String reportCurrency) {
+    public YahooFinanceQuoteFetcher(HttpClient httpClient, String reportCurrency) {
         this(new V10QuoteSummaryFetcher(httpClient), new ECBFxRateFetcher(httpClient), reportCurrency);
     }
-    YahooFinanceSearchService(V10QuoteSummaryFetcher v10QuoteSummaryFetcher, FxRateFetcher fxRateFetcher, String reportCurrency) {
+    YahooFinanceQuoteFetcher(V10QuoteSummaryFetcher v10QuoteSummaryFetcher, FxRateFetcher fxRateFetcher, String reportCurrency) {
         this.v10QuoteSummaryFetcher = v10QuoteSummaryFetcher;
         this.fxRateFetcher = fxRateFetcher;
         this.reportCurrency = reportCurrency;
     }
 
     @Override
-    public Map<QuoteMetric,Comparable<?>> findMetricValues(String securityId, Set<QuoteMetric> quoteMetrics) {
+    public Map<QuoteMetric,Comparable<?>> fetch(String securityId, Set<QuoteMetric> quoteMetrics) {
         Map<YahooMetric,Object> yahooMetricValues = v10QuoteSummaryFetcher.fetch(securityId, allNeededYahooMetrics(quoteMetrics));
         Map<QuoteMetric,Comparable<?>> resultValues = new HashMap<>();
         for (QuoteMetric quoteMetric : quoteMetrics) {

@@ -11,11 +11,11 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Contract: report currency has to be configured so that the LATEST_MARKET_PRICE_IN_REPORT_CURRENCY can be calculated
  */
-public interface SearchService extends BatchSearchService,SingleSearchService {
-    Map<QuoteMetric,Comparable<?>> findMetricValues(String securityId, Set<QuoteMetric> quoteMetrics);
-    default MetricValuesList findMetricValues(Set<String> securityIds, Set<QuoteMetric> quoteMetrics) {
+public interface QuoteFetcher extends BatchQuoteFetcher, SingleQuoteFetcher {
+    @Override
+    default MetricValuesList fetchAll(Set<String> securityIds, Set<QuoteMetric> quoteMetrics) {
         Map<String,MetricValues> result = securityIds.stream()
-                .map(secId ->new AbstractMap.SimpleImmutableEntry<>(secId, toMetricValues(secId, findMetricValues(secId, quoteMetrics))))
+                .map(secId ->new AbstractMap.SimpleImmutableEntry<>(secId, toMetricValues(secId, fetch(secId, quoteMetrics))))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new MetricValuesList(result);
     }
