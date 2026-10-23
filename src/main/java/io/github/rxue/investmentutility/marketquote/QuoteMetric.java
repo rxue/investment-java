@@ -1,0 +1,23 @@
+package io.github.rxue.investmentutility.marketquote;
+
+import io.github.rxue.investmentutility.vo.Metric;
+
+public enum QuoteMetric implements Metric {
+    COMPANY_NAME("Name"),
+    LATEST_MARKET_PRICE("Latest market price"),
+    LATEST_MARKET_PRICE_IN_REPORT_CURRENCY("Latest market price in report currency"),
+    REGULAR_MARKET_CHANGE_PERCENT("Regular market change percent"),
+    TRAILING_PE("Trailing P/E"),
+    DIVIDEND_YIELD("Dividend yield"),
+    DIVIDEND_PAYOUT_RATIO("Dividend payout ratio");
+    private final String label;
+
+    QuoteMetric(String label) {
+        this.label = label;
+    }
+
+    @Override
+    public String label() {
+        return label;
+    }
+}

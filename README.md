@@ -1,7 +1,7 @@
-# investment
+# investment-utility
 
 ## Introduction
-`investment` is a Java 21 library and command line tool for personal investment bookkeeping and analysis.
+`investment-utility` is a Java 21 library and command line tool for personal investment bookkeeping and analysis.
 
 It currently provides:
 * **Market quotes** – fetches quote metrics of securities, such as company name, latest market price, trailing P/E and dividend yield, from Yahoo Finance. The latest market price can also be converted to a configured report currency.
@@ -13,7 +13,7 @@ It currently provides:
 Print the name, latest market price, trailing P/E and dividend yield of Apple and Pfizer, sorted by trailing P/E:
 ```bash
 mvn -q compile exec:java \
-  -Dexec.mainClass=io.github.rxue.investment.cli.Main \
+  -Dexec.mainClass=io.github.rxue.investmentutility.cli.Main \
   -Dexec.args="quotes COMPANY_NAME,LATEST_MARKET_PRICE,TRAILING_PE,DIVIDEND_YIELD AAPL,PFE --sort-by TRAILING_PE"
 ```
 Output:
@@ -29,6 +29,6 @@ The ticker symbols can also be given as a path to a csv file, e.g. `tickers.csv`
 By default the ticker symbols are fetched one after another. With the `--concurrent` option they are fetched in parallel by a pool of 10 threads sharing one Yahoo Finance session, which is considerably faster for a long list of ticker symbols, e.g. from a csv file:
 ```bash
 mvn -q compile exec:java \
-  -Dexec.mainClass=io.github.rxue.investment.cli.Main \
+  -Dexec.mainClass=io.github.rxue.investmentutility.cli.Main \
   -Dexec.args="quotes COMPANY_NAME,LATEST_MARKET_PRICE tickers.csv --concurrent"
 ```

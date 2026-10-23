@@ -4,12 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.rxue</groupId>
-  <artifactId>investment</artifactId>
+  <artifactId>investment-utility</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
-  <name>investment</name>
+  <name>investment-utility</name>
   <description>Command line tool for fetching quote metrics of securities from Yahoo Finance</description>
-  <url>https://github.com/rxue/investment-java</url>
+  <url>https://github.com/rxue/investment-utility</url>
 
   <licenses>
     <license>
@@ -26,9 +26,9 @@
   </developers>
 
   <scm>
-    <url>https://github.com/rxue/investment-java</url>
-    <connection>scm:git:https://github.com/rxue/investment-java.git</connection>
-    <developerConnection>scm:git:git@github.com:rxue/investment-java.git</developerConnection>
+    <url>https://github.com/rxue/investment-utility</url>
+    <connection>scm:git:https://github.com/rxue/investment-utility.git</connection>
+    <developerConnection>scm:git:git@github.com:rxue/investment-utility.git</developerConnection>
   </scm>
 
   <properties>
