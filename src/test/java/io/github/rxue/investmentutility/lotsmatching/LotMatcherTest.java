@@ -16,7 +16,7 @@ public class LotMatcherTest {
         Lot.Buy secondBuy = new Lot.Buy(LocalDate.of(2026, 1, 13), 20, 57468);
         Lot.Sell sell = new Lot.Sell(LocalDate.of(2026, 1, 14), 20, 61200);
 
-        LotsMatchResult result = lotMatcher.matchInFIFO(List.of(firstBuy, secondBuy, sell));
+        LotsMatchResult result = lotMatcher.matchInFIFO(List.of(firstBuy, secondBuy, sell), List.of());
 
         assertEquals(List.of(new SellMatch(sell, List.of(firstBuy))), result.sellMatches());
         assertEquals(List.of(secondBuy), result.openLots());
@@ -32,7 +32,7 @@ public class LotMatcherTest {
         Lot.Buy thirdBuy = new Lot.Buy(LocalDate.of(2025, 11, 3), 80, 55300);
         Lot.Sell sell = new Lot.Sell(LocalDate.of(2026, 5, 7), 140, 187400);
 
-        LotsMatchResult result = lotMatcher.matchInFIFO(List.of(firstBuy, secondBuy, thirdBuy, sell));
+        LotsMatchResult result = lotMatcher.matchInFIFO(List.of(firstBuy, secondBuy, thirdBuy, sell), List.of());
 
         Lot.Buy soldPartOfThirdBuy = new Lot.Buy(LocalDate.of(2025, 11, 3), 20, 13825);
         Lot.Buy openPartOfThirdBuy = new Lot.Buy(LocalDate.of(2025, 11, 3), 60, 41475);

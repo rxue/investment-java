@@ -24,10 +24,13 @@ public class TradeMatcher {
         return Collections.unmodifiableMap(result);
     }
     public TradeMatchResult matchInFIFO(List<Trade> tradeList) {
+        return matchInFIFO(tradeList, Map.of());
+    }
+    public TradeMatchResult matchInFIFO(List<Trade> tradeList, Map<String,List<Lot.Buy>> openLotsMap) {
         Map<String,LotsMatchResult> result = new HashMap<>();
         LotMatcher lotMatcher = new LotMatcher();
         lotsBySecurityId(tradeList).forEach((securityId,lots) -> {
-            result.put(securityId, lotMatcher.matchInFIFO(lots));
+            result.put(securityId, lotMatcher.matchInFIFO(lots, openLotsMap.get(securityId)));
         });
         return new TradeMatchResult(Collections.unmodifiableMap(result));
     }

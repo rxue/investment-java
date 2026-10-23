@@ -29,8 +29,8 @@ class LotMatcher {
         throw new IllegalStateException();
     }
 
-    LotsMatchResult matchInFIFO(List<Lot> lots) {
-        Queue<Lot.Buy> remainingLots = new ArrayDeque<>();
+    LotsMatchResult matchInFIFO(List<Lot> lots, List<Lot.Buy> openLots) {
+        Queue<Lot.Buy> remainingLots = new ArrayDeque<>(openLots);
         List<SellMatch> sellMatches = new ArrayList<>();
         for (Lot lot : lots) {
             if (lot instanceof Lot.Buy buyLot)
@@ -41,4 +41,5 @@ class LotMatcher {
         }
         return new LotsMatchResult(Collections.unmodifiableList(sellMatches), remainingLots.stream().toList());
     }
+
 }
