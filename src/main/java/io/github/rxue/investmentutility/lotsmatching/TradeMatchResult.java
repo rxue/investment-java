@@ -1,9 +1,6 @@
 package io.github.rxue.investmentutility.lotsmatching;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -18,8 +15,13 @@ public class TradeMatchResult {
                 .sum();
     }
     public Map<String,Integer> openShareAmountBySecurity() {
-        return lotsMatchResultMap.entrySet().stream()
-                .collect(toMap(Map.Entry::getKey, e -> e.getValue().openShareAmount()));
+        Map<String,Integer> result = new HashMap<>();
+        lotsMatchResultMap.forEach((securityId, lotsMatchResult) -> {
+            List<Lot.Buy> openLots = lotsMatchResult.openLots();
+            if (!openLots.isEmpty())
+                result.put(securityId, openLots.stream().mapToInt(Lot.Buy::shareAmount).sum());
+        });
+        return Collections.unmodifiableMap(result);
     }
 
     public SellMatches sellMatches() {
@@ -28,10 +30,15 @@ public class TradeMatchResult {
         return new SellMatches(result);
     }
 
-    public OpenLots openLots() {
+    public List<OpenLots> openLotsList() {
+        List<OpenLots> result = new ArrayList<>();
+        lotsMatchResultMap.forEach((securityId,lotsMatchResult) -> result.add(new OpenLots(securityId, lotsMatchResult.openLots())));
+        return Collections.unmodifiableList(result);
+    }
+    public Map<String,List<Lot.Buy>> openLotsMap() {
         Map<String,List<Lot.Buy>> result = new HashMap<>();
         lotsMatchResultMap.forEach((securityId,lotsMatchResult) -> result.put(securityId, lotsMatchResult.openLots()));
-        return new OpenLots(Collections.unmodifiableMap(result));
+        return Collections.unmodifiableMap(result);
     }
 
 }

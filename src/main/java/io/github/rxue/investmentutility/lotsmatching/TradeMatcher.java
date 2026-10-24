@@ -30,7 +30,12 @@ public class TradeMatcher {
         Map<String,LotsMatchResult> result = new HashMap<>();
         LotMatcher lotMatcher = new LotMatcher();
         lotsBySecurityId(tradeList).forEach((securityId,lots) -> {
-            result.put(securityId, lotMatcher.matchInFIFO(lots, openLotsMap.get(securityId)));
+            List<Lot.Buy> openLots = openLotsMap.get(securityId);
+                result.put(securityId, lotMatcher.matchInFIFO(lots, openLots == null ? List.of() : openLots));
+        });
+        openLotsMap.forEach((securityId, openLots) -> {
+            if (!result.containsKey(securityId))
+                result.put(securityId, new LotsMatchResult(List.of(), openLots));
         });
         return new TradeMatchResult(Collections.unmodifiableMap(result));
     }
