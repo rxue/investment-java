@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TradeMatchResultTest {
 
@@ -20,5 +21,15 @@ public class TradeMatchResultTest {
                 "SAGCV", new LotsMatchResult(List.of(), List.of(sagcvBuy))));
 
         assertEquals(Map.of("SAGCV", 50), tradeMatchResult.openShareAmountBySecurity());
+    }
+
+    @Test
+    void openLotsList_with_open_lots_0() {
+        Lot.Buy mrnaBuy = new Lot.Buy(LocalDate.of(2026, 1, 13), 20, 57596);
+        Lot.Sell mrnaSell = new Lot.Sell(LocalDate.of(2026, 1, 14), 20, 61200);
+        TradeMatchResult tradeMatchResult = new TradeMatchResult(Map.of(
+                "MRNA", new LotsMatchResult(List.of(new SellMatch(mrnaSell, List.of(mrnaBuy))), List.of())));
+
+        assertTrue(tradeMatchResult.openLotsList().isEmpty());
     }
 }

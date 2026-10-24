@@ -32,12 +32,20 @@ public class TradeMatchResult {
 
     public List<OpenLots> openLotsList() {
         List<OpenLots> result = new ArrayList<>();
-        lotsMatchResultMap.forEach((securityId,lotsMatchResult) -> result.add(new OpenLots(securityId, lotsMatchResult.openLots())));
+        lotsMatchResultMap.forEach((securityId,lotsMatchResult) -> {
+            List<Lot.Buy> openLots = lotsMatchResult.openLots();
+            if (!openLots.isEmpty())
+                result.add(new OpenLots(securityId, lotsMatchResult.openLots()));
+        });
         return Collections.unmodifiableList(result);
     }
     public Map<String,List<Lot.Buy>> openLotsMap() {
         Map<String,List<Lot.Buy>> result = new HashMap<>();
-        lotsMatchResultMap.forEach((securityId,lotsMatchResult) -> result.put(securityId, lotsMatchResult.openLots()));
+        lotsMatchResultMap.forEach((securityId,lotsMatchResult) -> {
+            List<Lot.Buy> openLots = lotsMatchResult.openLots();
+            if (!openLots.isEmpty())
+                result.put(securityId, lotsMatchResult.openLots());
+        });
         return Collections.unmodifiableMap(result);
     }
 
